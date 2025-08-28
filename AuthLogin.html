@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Auth Slider – Login/Register</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- TailwindCSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    // Optional Tailwind config (keeps default palette)
+    tailwind.config = {
+      theme: {
+        extend: {},
+      },
+    };
+  </script>
+  <!-- Vue 3 (CDN) -->
+  <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-100 to-slate-200 antialiased">
+  <div id="app" class="p-6">
+
+    <!-- Page content -->
+    <div class="mx-auto max-w-2xl text-center">
+      <h1 class="text-3xl font-bold tracking-tight text-slate-900">Auth Slider Demo</h1>
+      <p class="mt-2 text-slate-600">Click the button to open a modal with a sliding Login/Register UI.</p>
+
+      <button
+        @click="open = true; focusAfterOpen()"
+        class="mt-6 rounded-xl bg-indigo-600 px-5 py-2.5 text-white font-medium hover:bg-indigo-700 transition"
+      >
+        Open Auth Modal
+      </button>
+    </div>
+
+    <!-- Backdrop -->
+    <transition
+      enter-active-class="transition-opacity duration-200"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition-opacity duration-150"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-show="open"
+        class="fixed inset-0 bg-black/40"
+        @click="close()"
+        aria-hidden="true"
+      ></div>
+    </transition>
+
+    <!-- Modal -->
+    <transition
+      enter-active-class="transition-transform duration-200"
+      enter-from-class="opacity-0 -translate-y-2"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition-transform duration-150"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-2"
+    >
+      <div
+        v-show="open"
+        class="fixed inset-0 grid place-items-center p-4"
+        @keydown.esc.prevent="close()"
+      >
+        <div
+          class="relative w-full max-w-md rounded-2xl bg-white shadow-2xl ring-1 ring-black/5 overflow-hidden"
+          role="dialog" aria-modal="true" aria-labelledby="auth-title"
+        >
+          <!-- Close button -->
+          <button
+		  @click="close()"
+		  class="absolute right-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-slate-100 transition z-10"
+		  aria-label="Close dialog"
+		>
+		  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18 18 6M6 6l12 12"/>
+		  </svg>
+		</button>
+
+          <!-- Slider frame -->
+          <div class="relative overflow-hidden">
+            <!-- Track (200% width = two panels) -->
+            <div
+              class="flex w-[200%] transition-transform duration-500 ease-out will-change-transform"
+              :class="mode === 'login' ? 'translate-x-0' : '-translate-x-1/2'"
+            >
+              <!-- Login panel -->
+              <section class="basis-1/2 shrink-0 p-6">
+                <h2 id="auth-title" class="text-xl font-semibold">Login</h2>
+                <form class="mt-4 space-y-3" @submit.prevent="fakeSubmit('login')">
+                  <label class="block">
+                    <span class="text-sm text-slate-600">Email</span>
+                    <input
+                      ref="loginEmailRef"
+                      type="email"
+                      class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      required autocomplete="email"
+                    />
+                  </label>
+                  <label class="block">
+                    <span class="text-sm text-slate-600">Password</span>
+                    <input
+                      type="password"
+                      class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      required autocomplete="current-password"
+                    />
+                  </label>
+
+                  <button
+                    type="submit"
+                    class="mt-2 w-full rounded-xl bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700 transition"
+                  >
+                    Sign in
+                  </button>
+                </form>
+
+                <p class="mt-4 text-sm text-slate-600">
+                  Don’t have an account?
+                  <button
+                    type="button"
+                    class="font-medium text-indigo-600 hover:underline"
+                    @click="go('register')"
+                  >
+                    Want to register?
+                  </button>
+                </p>
+              </section>
+
+              <!-- Register panel -->
+              <section class="basis-1/2 shrink-0 p-6">
+                <h2 class="text-xl font-semibold">Register</h2>
+                <form class="mt-4 space-y-3" @submit.prevent="fakeSubmit('register')">
+                  <label class="block">
+                    <span class="text-sm text-slate-600">Name</span>
+                    <input
+                      ref="registerNameRef"
+                      type="text"
+                      class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      required autocomplete="name"
+                    />
+                  </label>
+                  <label class="block">
+                    <span class="text-sm text-slate-600">Email</span>
+                    <input
+                      type="email"
+                      class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      required autocomplete="email"
+                    />
+                  </label>
+                  <label class="block">
+                    <span class="text-sm text-slate-600">Password</span>
+                    <input
+                      type="password"
+                      class="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      required autocomplete="new-password"
+                    />
+                  </label>
+
+                  <button
+                    type="submit"
+                    class="mt-2 w-full rounded-xl bg-indigo-600 px-4 py-2 font-medium text-white hover:bg-indigo-700 transition"
+                  >
+                    Create account
+                  </button>
+                </form>
+
+                <p class="mt-4 text-sm text-slate-600">
+                  Already have an account?
+                  <button
+                    type="button"
+                    class="font-medium text-indigo-600 hover:underline"
+                    @click="go('login')"
+                  >
+                    Want to login?
+                  </button>
+                </p>
+              </section>
+            </div>
+          </div>
+        </div>
+      </div>
+    </transition>
+  </div>
+
+  <script>
+    const { createApp, ref, nextTick } = Vue
+
+    createApp({
+      setup() {
+        const open = ref(false)
+        const mode = ref('login') // 'login' | 'register'
+
+        const loginEmailRef = ref(null)
+        const registerNameRef = ref(null)
+
+        function go(target) {
+          mode.value = target
+          // Focus first field after the slide finishes (~500ms)
+          nextTick(() => {
+            setTimeout(() => {
+              if (target === 'login') loginEmailRef.value?.focus()
+              else registerNameRef.value?.focus()
+            }, 520)
+          })
+        }
+
+        function close() {
+          open.value = false
+          // Reset to login when closing (optional)
+          setTimeout(() => { mode.value = 'login' }, 300)
+        }
+
+        function focusAfterOpen() {
+          // give the modal time to mount, then focus first input
+          nextTick(() => setTimeout(() => loginEmailRef.value?.focus(), 120))
+        }
+
+        function fakeSubmit(which) {
+          alert((which === 'login' ? 'Logging in…' : 'Registering…') + ' (demo)')
+        }
+
+        // Keyboard: close on Escape when modal open (safety net)
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && open.value) {
+            e.preventDefault()
+            close()
+          }
+        })
+
+        return {
+          open,
+          mode,
+          loginEmailRef,
+          registerNameRef,
+          go,
+          close,
+          focusAfterOpen,
+          fakeSubmit,
+        }
+      }
+    }).mount('#app')
+  </script>
+</body>
+</html>
